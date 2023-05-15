@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -19,10 +20,13 @@ import com.example.dronemr.place.Place
 import com.example.dronemr.place.PlaceRenderer
 import com.example.dronemr.place.PlacesReader
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.Circle
 import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.parrot.drone.groundsdk.GroundSdk
@@ -37,40 +41,63 @@ import com.parrot.drone.groundsdk.device.pilotingitf.ManualCopterPilotingItf
 import com.parrot.drone.groundsdk.facility.AutoConnection
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener,
+    GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCallback {
 
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var groundSdk: GroundSdk
+
     /** get Drone **/
     private var drone: Drone? = null
+
     /** Drone state text view. */
     private lateinit var droneStateTxt: TextView
+
     /** Drone battery charge level text view. */
     private lateinit var droneBatteryTxt: TextView
+
     /** Reference to the current drone state. */
     private var droneStateRef: Ref<DeviceState>? = null
+
     /** Reference to the current drone battery info instrument. */
     private var droneBatteryInfoRef: Ref<BatteryInfo>? = null
+
     /** Current remote control instance. */
     private var rc: RemoteControl? = null
+
     /** Reference to the current remote control state. */
     private var rcStateRef: Ref<DeviceState>? = null
+
     /** Reference to the current remote control battery info instrument. */
     private var rcBatteryInfoRef: Ref<BatteryInfo>? = null
+
     /** Remote state level text view. */
     private lateinit var rcStateTxt: TextView
+
     /** Remote battery charge level text view. */
     private lateinit var rcBatteryTxt: TextView
+
     /** Take off / land button. */
     private lateinit var takeOffLandBt: Button
+
     /** Reference to a current drone piloting interface. */
     private var pilotingItfRef: Ref<ManualCopterPilotingItf>? = null
+
+
+    /**map */
+    private lateinit var mMap: GoogleMap
+
     /**list of places to display */
     private val places: List<Place> by lazy {
         PlacesReader(this).read()
     }
+
+    /**list of markers added */
+    private val markers: MutableList<Marker> = arrayListOf()
+
+
     /** Bicycle icon TO CHANGE*/
     private val bicycleIcon: BitmapDescriptor by lazy {
         val color = ContextCompat.getColor(this, R.color.black)
@@ -115,6 +142,7 @@ class MainActivity : AppCompatActivity() {
             // com.example.dronemr.MarkerInfoWindowAdapter
             if (marker != null) {
                 marker.tag = place
+
             }
         }
     }
@@ -141,7 +169,7 @@ class MainActivity : AppCompatActivity() {
             return@setOnClusterItemClickListener false
         }
 
-        
+
         // Set ClusterManager as the OnCameraIdleListener so that it
         // can re-cluster when zooming in and out.
         googleMap.setOnCameraIdleListener {
@@ -150,9 +178,9 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        print("creating")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -160,15 +188,8 @@ class MainActivity : AppCompatActivity() {
         //Map reference
         val mapFragment = supportFragmentManager.findFragmentById(
             R.id.map_fragment
-        ) as? SupportMapFragment
-        mapFragment?.getMapAsync { googleMap ->
-            //addMarkers(googleMap)
-            addClusteredMarkers(googleMap)
-
-            // Set custom info window adapter.
-            //googleMap.setInfoWindowAdapter(MarkerInfoWindowAdapter(this))
-        }
-
+        ) as? SupportMapFragment?
+        mapFragment?.getMapAsync(this)
 
         setSupportActionBar(binding.appBarMain.toolbar)
 
@@ -195,7 +216,7 @@ class MainActivity : AppCompatActivity() {
         rcStateTxt = findViewById(R.id.rcStateTxt)
         rcBatteryTxt = findViewById(R.id.rcBatteryTxt)
         takeOffLandBt = findViewById(R.id.takeOffLandBt)
-        takeOffLandBt.setOnClickListener {onTakeOffLandClick()}
+        takeOffLandBt.setOnClickListener { onTakeOffLandClick() }
 
         // Initialize user interface default values.
         droneStateTxt.text = DeviceState.ConnectionState.DISCONNECTED.toString()
@@ -207,8 +228,6 @@ class MainActivity : AppCompatActivity() {
         // automatically closed at its destruction.
 
 
-
-
     }
 
     override fun onStart() {
@@ -218,7 +237,7 @@ class MainActivity : AppCompatActivity() {
         groundSdk.getFacility(AutoConnection::class.java) {
             // Called when the auto connection facility is available and when it changes.
 
-            it?.let{
+            it?.let {
                 // Start auto connection.
                 if (it.status != AutoConnection.Status.STARTED) {
                     it.start()
@@ -226,7 +245,7 @@ class MainActivity : AppCompatActivity() {
 
                 // If the drone has changed.
                 if (drone?.uid != it.drone?.uid) {
-                    if(drone != null) {
+                    if (drone != null) {
                         // Stop monitoring the old drone.
                         stopDroneMonitors()
 
@@ -236,13 +255,13 @@ class MainActivity : AppCompatActivity() {
 
                     // Monitor the new drone.
                     drone = it.drone
-                    if(drone != null) {
+                    if (drone != null) {
                         startDroneMonitors()
                     }
                 }
                 // If the remote control has changed.
-                if (rc?.uid  != it.remoteControl?.uid) {
-                    if(rc != null) {
+                if (rc?.uid != it.remoteControl?.uid) {
+                    if (rc != null) {
                         // Stop monitoring the old remote.
                         stopRcMonitors()
 
@@ -252,7 +271,7 @@ class MainActivity : AppCompatActivity() {
 
                     // Monitor the new remote.
                     rc = it.remoteControl
-                    if(rc != null) {
+                    if (rc != null) {
                         startRcMonitors()
                     }
                 }
@@ -298,7 +317,7 @@ class MainActivity : AppCompatActivity() {
 
             it?.let {
                 // Update drone battery charge level view.
-                droneBatteryTxt.text ="${it.charge} %"
+                droneBatteryTxt.text = "${it.charge} %"
             }
         }
     }
@@ -343,7 +362,7 @@ class MainActivity : AppCompatActivity() {
      * @param itf the piloting interface
      */
     private fun managePilotingItfState(itf: ManualCopterPilotingItf) {
-        when(itf.state) {
+        when (itf.state) {
             Activable.State.UNAVAILABLE -> {
                 // Piloting interface is unavailable.
                 takeOffLandBt.isEnabled = false
@@ -366,11 +385,13 @@ class MainActivity : AppCompatActivity() {
                         takeOffLandBt.isEnabled = true
                         takeOffLandBt.text = "Take off"
                     }
+
                     itf.canLand() -> {
                         // Drone can land.
                         takeOffLandBt.isEnabled = true
-                        takeOffLandBt.text ="Land"
+                        takeOffLandBt.text = "Land"
                     }
+
                     else -> // Disable the button.
                         takeOffLandBt.isEnabled = false
                 }
@@ -480,4 +501,56 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    override fun onMapClick(p0: LatLng) {
+        val marker = mMap.addMarker(
+            MarkerOptions()
+                .title((markers.lastIndex + 2).toString())
+                .position(p0)
+                .anchor(0.5F, 0.5F)
+                .icon(bicycleIcon)
+                .draggable(true)
+        )
+        // Set place as the tag on the marker object so it can be referenced within
+        // com.example.dronemr.MarkerInfoWindowAdapter
+        if (marker != null) {
+            marker.tag = "test"
+            markers.add(marker)
+
+        }
+
+    }
+
+    override fun onMapLongClick(p0: LatLng) {
+
+        val size = markers.lastIndex + 1
+        markers.clear()
+        mMap.clear()
+        if(size == 1){
+        val myToast = Toast.makeText(this, "marker removed", Toast.LENGTH_SHORT)
+            myToast.show()}
+        if(size > 1){
+            val myToast = Toast.makeText(this, "markers removed", Toast.LENGTH_SHORT)
+            myToast.show()}
+
+    }
+
+    override fun onMapReady(p0: GoogleMap) {
+        print("getting ready")
+        mMap = p0 ?: return
+        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL;
+        //addClusteredMarkers(mMap)
+        mMap.setOnMapClickListener(this)
+        mMap.setOnMapLongClickListener(this)
+        //mMap.setOnCameraIdleListener(this)
+
+    }
+
+    override fun onCameraIdle() {
+        TODO("Not yet implemented")
+        print("idk")
+    }
 }
+
+
+
