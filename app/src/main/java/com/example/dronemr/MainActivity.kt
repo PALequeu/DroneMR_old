@@ -1,5 +1,6 @@
 package com.example.dronemr
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.Menu
 import android.widget.Button
@@ -120,9 +121,7 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener,
         )
     }
 
-    private fun addMarker(googleMap: GoogleMap, item: Place) {
 
-    }
 
 
     /**
@@ -521,13 +520,14 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener,
 
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onMapLongClick(p0: LatLng) {
 
         val size = markers.lastIndex + 1
         markers.clear()
         mMap.clear()
         if(size == 1){
-        val myToast = Toast.makeText(this, "marker removed", Toast.LENGTH_SHORT)
+            val myToast = Toast.makeText(this, "marker removed", Toast.LENGTH_SHORT)
             myToast.show()}
         if(size > 1){
             val myToast = Toast.makeText(this, "markers removed", Toast.LENGTH_SHORT)
