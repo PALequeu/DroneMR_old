@@ -8,6 +8,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronemr.databinding.FragmentSlideshowBinding
+import com.parrot.drone.groundsdk.Ref
+import com.parrot.drone.groundsdk.device.peripheral.StreamServer
+import com.parrot.drone.groundsdk.device.peripheral.stream.CameraLive
+import com.parrot.drone.groundsdk.stream.GsdkStreamView
 
 class SlideshowFragment : Fragment() {
 
@@ -16,6 +20,16 @@ class SlideshowFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    /** Reference to the current drone stream server Peripheral. */
+    private var streamServerRef: Ref<StreamServer>? = null
+    /** Reference to the current drone live stream. */
+    private var liveStreamRef: Ref<CameraLive>? = null
+    /** Current drone live stream. */
+    private var liveStream: CameraLive? = null
+    // User interface:
+    /** Video stream view. */
+    //private val streamView by lazy { findViewById<GsdkStreamView>(R.id.stream_view) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,6 +46,8 @@ class SlideshowFragment : Fragment() {
         slideshowViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+
         return root
     }
 
