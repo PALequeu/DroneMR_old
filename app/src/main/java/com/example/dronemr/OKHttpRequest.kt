@@ -21,20 +21,20 @@ import kotlinx.coroutines.Dispatchers.IO
 
 
 class OkHttpRequest(client: OkHttpClient) {
-    private var client = OkHttpClient()
+    private var client = client
     var lastMessage = "ok"
 
-    fun sendLocation(jsonMessage: String, url : String): Boolean {
+    fun sendLocation(jsonMessage: String, url : String) {
 
         // Lancement de la coroutine principale
-        var success = false
+
         runBlocking {
             launch(IO) {
                 var successful = post(jsonMessage, url)
-                success = successful
+
             }
         }
-        return success
+
     }
 
     fun get() {
@@ -68,27 +68,25 @@ class OkHttpRequest(client: OkHttpClient) {
 
     }
 
-    suspend fun post(jsonMessage: String, url : String): Boolean {
+    suspend fun post(jsonMessage: String, url : String){
 
         val request = Request.Builder()
             .url(url)
             .post(jsonMessage.toRequestBody(MEDIA_TYPE_MARKDOWN))
             .build()
 
-        var resBuffer = false
 
         withContext(IO) {
             val response = client.newCall(request).execute()
             if (response.isSuccessful) {
                 println("JSON envoyé avec succès au serveur.")
-
             } else {
                 println("Erreur lors de l'envoi du JSON au serveur: ${response.code}")
             }
-            resBuffer = response.isSuccessful
+
         }
 
-        return resBuffer
+
 
         /**
         client.newCall(request).execute().use { response ->
