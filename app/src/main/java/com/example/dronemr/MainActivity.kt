@@ -2,6 +2,7 @@ package com.example.dronemr
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.Menu
 import android.view.View
@@ -65,9 +66,9 @@ const val TAG = "Sussy"
 class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener,
 GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCallback, View.OnClickListener {
 
-    private val bicycleIcon: BitmapDescriptor by lazy {
+    private val droneIcon: BitmapDescriptor by lazy {
         val color = ContextCompat.getColor(this, R.color.black)
-        BitmapHelper.vectorToBitmap(this, R.drawable.ic_directions_bike_black_24dp, color)
+        BitmapHelper.vectorToBitmap(this, R.drawable.drone_icon, color)
     }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -160,6 +161,8 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
     private lateinit var position: JSONObject
     private lateinit var positionJSON: JSONObject
 
+    //handler to send data to server every X second
+    private var mHandler: Handler? = null
     /**
     private fun addClusteredMarkers(googleMap: GoogleMap) {
         // Create the ClusterManager class and set the custom renderer.
@@ -356,6 +359,11 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
         //initial request
         request = OkHttpRequest(client)
 
+        //handler
+        mHandler = Handler(mainLooper)
+
+
+
     }
 
     override fun onStart() {
@@ -385,7 +393,7 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
                     // Monitor the new drone.
                     drone = it.drone
                     if (drone != null) {
-                        sendLocationToServer(positionJSON.toString(), serverUrl)
+                        //sendLocationToServer(positionJSON.toString(), serverUrl)
                         startDroneMonitors()
                     }
                 }
@@ -424,16 +432,9 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
         // Monitor drone Altitude
         monitorDroneAltitude()
         //send data
-        positionJSON.put("timestamp", System.currentTimeMillis())
-        var success = sendLocationToServer(positionJSON.toString(), serverUrl)
-        if (success) {
-            val myToast = Toast.makeText(this, "data sent", Toast.LENGTH_SHORT)
-            myToast.show()
-        }
-        else {
-            val myToast = Toast.makeText(this, "data not sent", Toast.LENGTH_SHORT)
-            myToast.show()
-        }
+        //positionJSON.put("timestamp", System.currentTimeMillis())
+        //sendLocationToServer(positionJSON.toString(), serverUrl)
+        startSending()
     }
 
     /**
@@ -555,7 +556,7 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
             .title("drone")
             .position(pos)
             .anchor(0.5F, 0.5F)
-            .icon(bicycleIcon)
+            .icon(droneIcon)
             .draggable(false)
 
 
@@ -772,9 +773,9 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
             MarkerOptions()
                 .title((markers.lastIndex + 2).toString())
                 .position(p0)
-                .anchor(0.5F, 0.5F)
-                .icon(bicycleIcon)
                 .draggable(true)
+                //.anchor(0.5F, 0.5F)
+            //.icon(bicycleIcon)
         )
         // Set place as the tag on the marker object so it can be referenced within
         // com.example.dronemr.MarkerInfoWindowAdapter
@@ -850,14 +851,29 @@ GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraIdleListener, OnMapReadyCall
         TODO("Not yet implemented")
     }
 
-    private fun sendLocationToServer(jsonMessage: String, url : String): Boolean {
+    private fun sendLocationToServer(jsonMessage: String, url : String) {
         // Lancement d'une coroutine sur le Dispatcher par défaut (Main)
-        var success = false
+
         GlobalScope.launch {
-            var successful = request.sendLocation(jsonMessage, url)
-            success = successful
+            request.sendLocation(jsonMessage, url)
+
         }
-        return success
+
+    }
+
+    private fun startSending() {
+        Thread {
+            while(true) {
+                try {
+                    //sleep for 10 seconds
+                    Thread.sleep(10000)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+                positionJSON.put("timestamp", System.currentTimeMillis())
+                sendLocationToServer(positionJSON.toString(), serverUrl)
+            }
+        }
     }
 
 
