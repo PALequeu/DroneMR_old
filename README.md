@@ -23,11 +23,13 @@ The interface gives important information about the drone and its controller, su
 <p align="center">
 <img src="https://github.com/PALequeu/DroneMR/assets/96840467/f8dd7798-2969-4cc6-8a88-0c02a6c59c9f" height="500" width="auto" />
 </p>
-The two blue bottom right buttons allow you to zoom in on the drone when it is connected for the top one, and follow the drone when it is moving for the bottom one. On the bottom part the application are five buttons :   
-  - Config allows you to change informations of the mission you are generating, of the CoHoMa configuration, and change the server you are sending data to.  
-  - Generate generates the mavlink mission file related to all the waypoint you added on the map, in the right order.  
-  - Start (active when Generate has been pressed) sends the mission to the drone and starts it.  
-  - Stop (active when Generate has been pressed as well) stop the ongoing mission.  
+<p>
+The two blue bottom right buttons allow you to zoom in on the drone when it is connected for the top one, and follow the drone when it is moving for the bottom one. On the bottom part the application are five buttons : <br />
+  - <b>Config</b> allows you to change informations of the mission you are generating, of the CoHoMa configuration, and change the server you are sending data to. <br /> 
+  - <b>Generate</b> generates the mavlink mission file related to all the waypoint you added on the map, in the right order. <br />
+  - <b>Start</b> (active when Generate has been pressed) sends the mission to the drone and starts it. <br />
+  - <b>Stop</b> (active when Generate has been pressed as well) stop the ongoing mission. <br />
+</p>
 <p align="center">
 <img src="https://github.com/PALequeu/DroneMR/assets/96840467/4ce05ed4-375d-4cae-b1fa-d34d311e91e3" height="500" width="auto" />
 </p>
@@ -44,12 +46,17 @@ A drawer has also been implemented. At the moment, it has no use, but its aim is
 <p align="center">
 <img src="https://github.com/PALequeu/DroneMR/assets/96840467/5fefe2e4-5ccd-412e-8035-ec71ec9c3f44" height="500" width="auto" />
 </p>
-As mentionned before, the application is developped in Kotlin using Android Studio. Three technologies makes the entire application :  
-  - GroundSDK is the API developped by Parrot in order to develop web apps and mobile apps in order to interact with parrot drones. You can find the documentation [here](https://developer.parrot.com/docs/refdoc-android/index.html).  
-  - Google Maps API is the API developped by google to access their map service and develop app around it. It is quite intuitive and very permissive. You can find their website [here](https://developers.google.com/maps?hl=fr).  
-  - OkHTTP3 is a free open source API to make HTTP request that handle common connection problems by itself. [Here](https://square.github.io/okhttp/) is their website.
+<p>
+As mentionned before, the application is developped in Kotlin using Android Studio. Three technologies makes the entire application : <br />
+  - <b>GroundSDK</b> is the API developped by Parrot in order to develop web apps and mobile apps in order to interact with parrot drones. You can find the documentation [here](https://developer.parrot.com/docs/refdoc-android/index.html). <br />
+  - <b>Google Maps</b> API is the API developped by google to access their map service and develop app around it. It is quite intuitive and very permissive. You can find their website [here](https://developers.google.com/maps?hl=fr). <br />
+  - <b>OkHTTP3</b> is a free open source API to make HTTP request that handle common connection problems by itself. [Here](https://square.github.io/okhttp/) is their website. <br />
+</p>
 
-## Perspectives
+## Limits & Perspectives
+
+One of the main limit of the project is the difficulty to test it without doing anything illegal. It is not allowed to fly drone in public spaces in France, so mission are hard to test. I was able to make so basic testing directly in the Mines Nancy Engineering school, but I had not enough spaces to test missions safely (in case it goes south !).  
+Another limit of the project is the drone used. Parrot Anafi updates their gps position at a 1Hz frequency, which is very low. Therefore, the flocking will be quite difficult to implement for them. However, the school recently invested in a Parrot Anafi AI drone, that will be much more adapted to the project, and should work seamlessly with the app.
 
 The next step in the project is the implement the camera monitoring, which is an important feature of the app. The "makes flocks of drone fly together" part is handled by another student of the Mines Nancy school of engineering, but I will probably have to also work on it in order for it to work well with the app.  
 Then, the idea is the use the flocks of drone to monitor areas to prevent poaching, to look for structural problems on nuclear reactor, or to access and analyze unreacheable areas.  
