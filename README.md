@@ -9,7 +9,7 @@
 DroneMR is a mobile app developped by Pierre-Antoine Lequeu as a school project.  
 The app is developped in kotlin using Android Studio. 
 
-Its aim is to follow and control Parrot Anafi and Anafi AI drone (and potentially all drone using parrot's GroundSDK & AirSDK APIs) using either a parrot controler or mavlink missions generation.
+Its aim is to follow and control Parrot Anafi and Anafi AI drone (and potentially all drone using parrot's GroundSDK & AirSDK APIs) using either a parrot remote controller or mavlink missions.
 
 At this point in time, it can connect to a drone and a parrot remote controller, monitor their state (battery left, position, number of sattelite(s) connected) and give basic control order to a drone : Take Off & Land.  
 Mavlink mission generation and sending to a drone are implemented, but is yet to be tested, as the drone can not be used in public places.  
@@ -24,16 +24,18 @@ The interface gives important information about the drone and its controller, su
 <img src="https://github.com/PALequeu/DroneMR/assets/96840467/f8dd7798-2969-4cc6-8a88-0c02a6c59c9f" height="500" width="auto" />
 </p>
 <p>
-The two blue bottom right buttons allow you to zoom in on the drone when it is connected for the top one, and follow the drone when it is moving for the bottom one. On the bottom part the application are five buttons : <br />
+The two blue bottom right buttons allow you to zoom in on the drone when it is connected for the top one, and follow the drone when it is moving for the bottom one. On the bottom part the application are four buttons : <br />
   - <b>Config</b> allows you to change informations of the mission you are generating, of the CoHoMa configuration, and change the server you are sending data to. <br /> 
   - <b>Generate</b> generates the mavlink mission file related to all the waypoint you added on the map, in the right order. <br />
   - <b>Start</b> (active when Generate has been pressed) sends the mission to the drone and starts it. <br />
   - <b>Stop</b> (active when Generate has been pressed as well) stop the ongoing mission. <br />
+
+The last button is the "Take Off" button that, as one could imagine, makes the drone take off. It then changes into a "Land" button to make the drone land.  
+
 </p>
 <p align="center">
 <img src="https://github.com/PALequeu/DroneMR/assets/96840467/4ce05ed4-375d-4cae-b1fa-d34d311e91e3" height="500" width="auto" />
 </p>
-The last button is the "Take Off" button that, as one could imagine, makes the drone take off. It then changes into a "Land" button to make the drone land.  
 
 A drawer has also been implemented. At the moment, it has no use, but its aim is to be able to have a window to display the drone camera, and to access the videos saved on the drone.
 
@@ -58,9 +60,8 @@ As mentionned before, the application is developped in Kotlin using Android Stud
 One of the main limit of the project is the difficulty to test it without doing anything illegal. It is not allowed to fly drone in public spaces in France, so mission are hard to test. I was able to make so basic testing directly in the Mines Nancy Engineering school, but I had not enough spaces to test missions safely (in case it goes south !).  
 Another limit of the project is the drone used. Parrot Anafi updates their gps position at a 1Hz frequency, which is very low. Therefore, the flocking will be quite difficult to implement for them. However, the school recently invested in a Parrot Anafi AI drone, that will be much more adapted to the project, and should work seamlessly with the app.
 
-The next step in the project is the implement the camera monitoring, which is an important feature of the app. The "makes flocks of drone fly together" part is handled by another student of the Mines Nancy school of engineering, but I will probably have to also work on it in order for it to work well with the app.  
-Then, the idea is the use the flocks of drone to monitor areas to prevent poaching, to look for structural problems on nuclear reactor, or to access and analyze unreacheable areas.  
-All that could be made through deep learning, either directly on the drone, or on another computer.
+The next step in the project is the implement the camera monitoring, which is an important feature of the app. The "makes flocks of drone fly together" part is handled by another student of the school, but I will probably have to also work on it in order for it to work well with the app.  
+Then, the idea is the use the flocks of drone to monitor areas to prevent poaching, to look for structural problems on nuclear reactor, or to access and analyze unreacheable areas. All that could be made through deep learning, either directly on the drone, or on another computer, and will be the subject of my internship.
 
 
 
